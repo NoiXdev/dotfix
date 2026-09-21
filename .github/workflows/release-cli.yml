@@ -1,0 +1,46 @@
+name: Release CLI
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build both architectures
+        run: |
+          cargo build --release -p dotfix --target aarch64-apple-darwin
+          cargo build --release -p dotfix --target x86_64-apple-darwin
+
+      - name: Create a universal binary
+        run: |
+          mkdir -p dist
+          lipo -create -output dist/dotfix \
+            target/aarch64-apple-darwin/release/dotfix \
+            target/x86_64-apple-darwin/release/dotfix
+          tar -czf "dotfix-${GITHUB_REF_NAME}-macos-universal.tar.gz" -C dist dotfix
+          shasum -a 256 "dotfix-${GITHUB_REF_NAME}-macos-universal.tar.gz" | tee checksum.txt
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dotfix-*-macos-universal.tar.gz
+            checksum.txt
+
+      - name: Bump the tap formula
+        env:
+          GH_TOKEN: ${{ secrets.TAP_TOKEN }}
+        run: |
+          SHA=$(cut -d' ' -f1 checksum.txt)
+          gh workflow run bump.yml --repo NoiXdev/homebrew-tap \
+            -f formula=dotfix -f version="${GITHUB_REF_NAME#v}" -f sha256="$SHA"

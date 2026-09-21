@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+/*
+ * dotfix design tokens.
+ *
+ * Monochrome-first, matching the tray glyph: canvas/surface/ink/hairline
+ * carry no meaning on their own. `decision` and `destructive` are the only
+ * two colours that mean anything — "needs your decision" and "irreversible",
+ * respectively — and every other surface in the app stays neutral so those
+ * two stay legible when they do appear.
+ *
+ * Typefaces follow the platform rather than a brought-in webfont: this is a
+ * menubar utility that should feel like part of macOS, not a web page in a
+ * box. Data that echoes the terminal/git world dotfix lives in (counts,
+ * diffs) uses the system monospace with tabular figures.
+ */
+@theme {
+  --color-canvas: #f7f7f5;
+  --color-surface: #ffffff;
+  --color-ink: #1c1c1e;
+  --color-ink-muted: #6e6e73;
+  --color-hairline: #e3e3e0;
+
+  /*
+   * The outline of something you can operate, as opposed to a line that
+   * merely separates. `hairline` is deliberately faint — it divides rows
+   * without drawing attention — but a button wearing it measured 1.2 against
+   * the canvas, where a control needs 3.0 to be seen at all. So the two are
+   * different colours now, and the rule is legible in the markup: a full
+   * `border` is an element, a single edge is a divider.
+   */
+  --color-control: #8a8a86;
+  /* Darkened from #9a6300, which reached only 4.22 against `decision-soft` —
+   * under the 4.5 a body text needs. This clears it at 4.75, same hue. */
+  --color-decision: #8f5c00;
+  --color-decision-soft: #f5ead0;
+  --color-destructive: #b3261e;
+  --color-destructive-soft: #f9e4e2;
+
+  /*
+   * The diff view is the one place dotfix has to show a third kind of
+   * meaning: "this line would be written" versus "this line would go away".
+   * `removed` deliberately borrows `destructive` — a line disappearing and
+   * an action being irreversible read the same way — so `added` is the only
+   * genuinely new colour in the app, kept as muted as the other two.
+   */
+  --color-added: #2f6d3f;
+  --color-added-soft: #e6efe4;
+
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial,
+    sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+/*
+ * Dark mode, following the system rather than offering a switch of its own.
+ * A menubar utility that disagreed with the rest of macOS about whether it is
+ * night would be the odd one out on the screen — and a preference nobody
+ * asked for is a preference to maintain.
+ *
+ * Only the nine colour tokens change. Nothing in the components names a
+ * colour directly, so this is the whole of it — and the relationships the
+ * light palette was built on are preserved: `decision` and `destructive`
+ * remain the only two hues that mean anything, `added` stays the third and
+ * quietest, and everything else is neutral so those three keep their weight.
+ *
+ * `canvas` is the ink of the light palette, which is also the background of
+ * the app icon. That is deliberate: the same near-black carries the mark in
+ * the Dock and the window behind it.
+ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-canvas: #1c1c1e;
+    --color-surface: #262628;
+    --color-ink: #f2f2f5;
+    --color-ink-muted: #9a9aa0;
+    --color-hairline: #3a3a3d;
+    /* 1.5 against the dark canvas before — the problem was never only the
+     * light palette, it was just louder there. */
+    --color-control: #78787d;
+
+    /* Both meaningful hues move up in lightness, not just invert: an amber
+     * and a red tuned for white would sit too dark to read on near-black. */
+    --color-decision: #d9a13a;
+    --color-decision-soft: #3a2e15;
+    --color-destructive: #f2665c;
+    --color-destructive-soft: #3b1c19;
+
+    --color-added: #5fb573;
+    --color-added-soft: #1b3122;
+  }
+}
+
+/*
+ * Tells the platform which palette the page is in, which is what makes the
+ * native parts follow: text fields, their carets, scrollbars and the focus
+ * ring. Without it the settings and wizard inputs would stay white boxes on
+ * a dark window.
+ */
+:root {
+  color-scheme: light dark;
+}
+
+/*
+ * The window is painted before React mounts. Without a background here that
+ * first frame is white, which reads as a flash every time the window opens —
+ * and this window is opened dozens of times a day.
+ */
+html,
+body {
+  background-color: var(--color-canvas);
+}

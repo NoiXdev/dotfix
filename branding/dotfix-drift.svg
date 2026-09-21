@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  dotfix — drift state, monochrome master.
+
+  The same "d" as dotfix.svg plus a status dot in the upper right, the device
+  tabs-manager uses for its own badge. This is what the menubar shows when
+  something drifted; the quiet mark is what it shows the other 99% of the time.
+
+  The mask cuts a transparent moat around the dot so the dot stays a separate
+  shape at 16px instead of fusing with the stem. Dot radius 124 and moat 72 were
+  chosen by rendering at 16x16 and checking the gap survives — if you move the
+  dot or change the stroke, re-check at that size, not at 1024.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <mask id="moat">
+    <rect width="1024" height="1024" fill="#ffffff"/>
+    <circle cx="872" cy="182" r="196" fill="#000000"/>
+  </mask>
+  <g mask="url(#moat)">
+    <circle cx="452" cy="618" r="224" fill="none" stroke="#000000" stroke-width="118"/>
+    <rect x="676" y="150" width="118" height="708" rx="59" fill="#000000"/>
+  </g>
+  <circle cx="872" cy="182" r="124" fill="#000000"/>
+</svg>

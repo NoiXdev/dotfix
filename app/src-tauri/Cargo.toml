@@ -1,0 +1,27 @@
+[package]
+name = "dotfix-app"
+version = "1.0.0-beta.1"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+name = "dotfix_app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build.workspace = true
+
+[dependencies]
+dotfix-core = { path = "../../crates/core" }
+tauri.workspace = true
+tauri-plugin-autostart.workspace = true
+tauri-plugin-opener.workspace = true
+tauri-plugin-single-instance.workspace = true
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+dotfix-core = { path = "../../crates/core", features = ["fakes"] }

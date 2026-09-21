@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  dotfix — quiet state, monochrome master.
+
+  This is a macOS menubar TEMPLATE IMAGE: black on transparent, no gradients,
+  no colour. macOS inverts it for dark menubars and for the pressed state, so
+  never add colour here — derive the coloured app icon from this shape instead
+  (see dotfix-icon.svg).
+
+  The mark is a lowercase "d", following the house convention notefix uses (a
+  letterform on a dark rounded square). At 16pt a letter stays unambiguous,
+  while abstract shapes tend to read as some other system symbol.
+
+  Geometry is tuned for 16px: the 118-unit stroke lands at ~1.8px, and the bowl
+  overlaps the stem so the two merge into one glyph rather than reading as "o|".
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <circle cx="452" cy="618" r="224" fill="none" stroke="#000000" stroke-width="118"/>
+  <rect x="676" y="150" width="118" height="708" rx="59" fill="#000000"/>
+</svg>

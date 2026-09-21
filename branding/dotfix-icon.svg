@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  dotfix — Dock/Finder app icon, derived from the monochrome master.
+
+  House convention (see notefix, tabs-manager): one bold mark in a product
+  colour on a dark rounded square. The shape here is exactly the "d" from
+  dotfix.svg — never redraw it, or the menubar glyph and the app icon will
+  drift apart.
+
+  Background #1c1c1e is the same ink the app's UI uses (the color-ink token in
+  app/src/index.css). The accent is a calm blue chosen to sit apart from the
+  siblings already in the family (notefix is yellow, tabs-manager teal) and to
+  read as infrastructure rather than as something demanding attention — dotfix
+  is a background tool. It is one value; change it here and re-run
+  generate-icons.sh if you want a different product colour.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <rect width="1024" height="1024" rx="228" fill="#1c1c1e"/>
+  <g transform="translate(512 512) scale(0.74) translate(-512 -512)">
+    <circle cx="452" cy="618" r="224" fill="none" stroke="#6FA8FF" stroke-width="118"/>
+    <rect x="676" y="150" width="118" height="708" rx="59" fill="#6FA8FF"/>
+  </g>
+</svg>

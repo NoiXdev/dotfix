@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<!--
+  Intentionally empty. dotfix runs `brew`, `git` and `security` as child
+  processes (Command::new), which needs no entitlement at all — the
+  hardened-runtime entitlements that exist (allow-unsigned-executable-memory,
+  disable-library-validation) govern code loaded into THIS process's own
+  address space (dylibs, JIT'd memory), not what a spawned child process can
+  do, so they would grant nothing this app needs while permanently widening
+  its own attack surface (disable-library-validation in particular would let
+  the signed, notarized binary load dylibs signed by anyone, not just the
+  same Team ID).
+
+  This file (and the hardened runtime it enables) stays required for
+  notarization. Add an entitlement here only if notarization fails with an
+  error that names it specifically, and record which error prompted it:
+    - none recorded yet.
+-->
+<dict/>
+</plist>

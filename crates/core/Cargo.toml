@@ -1,0 +1,24 @@
+[package]
+name = "dotfix-core"
+version = "1.0.0-beta.1"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[features]
+fakes = []
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+toml.workspace = true
+toml_edit.workspace = true
+thiserror.workspace = true
+minijinja.workspace = true
+sha2.workspace = true
+plist.workspace = true
+similar.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

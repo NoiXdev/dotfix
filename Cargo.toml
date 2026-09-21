@@ -1,0 +1,28 @@
+[workspace]
+members = ["crates/core", "crates/cli", "app/src-tauri"]
+resolver = "3"
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.96"
+license = "MIT"
+repository = "https://github.com/NoiXdev/dotfix"
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.9"
+toml_edit = "0.23"
+thiserror = "2"
+anyhow = "1"
+minijinja = "2"
+sha2 = "0.10"
+clap = { version = "4", features = ["derive"] }
+plist = "1"
+tempfile = "3"
+similar = "2"
+tauri = { version = "2", features = ["tray-icon", "image-png"] }
+tauri-build = "2"
+tauri-plugin-autostart = "2"
+tauri-plugin-opener = "2"
+tauri-plugin-single-instance = "2"
