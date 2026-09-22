@@ -219,3 +219,9 @@ export interface Published {
   committed: string[];
   pushed: boolean;
 }
+
+/** Mirrors `commands::About`. */
+export interface About {
+  version: string;
+  links: { label: string; url: string }[];
+}

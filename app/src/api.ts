@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 
 import type {
+  About,
   AuthMethod,
   CloneTarget,
   Commit,
@@ -26,6 +27,12 @@ async function call<T>(cmd: string, args?: Record<string, unknown>): Promise<T> 
     throw new Error(typeof err === "string" ? err : String(err));
   }
 }
+
+export const readAbout = () => call<About>("about");
+
+/// Refused by the backend unless it is one of dotfix's own links, so this
+/// cannot become a way to open arbitrary URLs from the webview.
+export const openLink = (url: string) => call<void>("open_link", { url });
 
 export const getOverview = () => call<Overview>("overview");
 export const refresh = () => call<Overview>("refresh");

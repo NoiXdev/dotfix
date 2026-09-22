@@ -1,6 +1,7 @@
 //! Core logic for dotfix. Contains no side effects: all interaction with
 //! Homebrew, the filesystem and git goes through the traits in [`ports`].
 
+pub mod about;
 pub mod adopt;
 pub mod agent;
 pub mod apply;

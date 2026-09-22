@@ -13,6 +13,8 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Command {
+    /// Version, and where to read more
+    About,
     /// Apply incoming changes and removals
     Apply {
         #[arg(long)]
@@ -122,6 +124,7 @@ enum Command {
 fn main() {
     let cli = Cli::parse();
     let result = match cli.command {
+        Command::About => cmd::about::run(),
         Command::Apply {
             yes,
             dry_run,

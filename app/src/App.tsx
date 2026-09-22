@@ -21,6 +21,7 @@ import {
   renameMachine,
   unignore,
 } from "./api";
+import About from "./areas/About";
 import Changes from "./areas/Changes";
 import Configs from "./areas/Configs";
 import History from "./areas/History";
@@ -36,16 +37,19 @@ import type {
   Settings, Commit, Overview, SetEntry } from "./types";
 import Wizard from "./wizard/Wizard";
 
-/** The five areas: Changes and Unmanaged act on drift, Configs reviews
- * hand-edited files, Sets decides which sets this machine uses, and History
- * is a read-only log of the configuration repository's commits. */
+/** The seven areas: Changes and Unmanaged act on drift, Configs reviews
+ * hand-edited files, Sets decides which sets this machine uses, History is a
+ * read-only log of the configuration repository's commits, Settings holds
+ * what is not about drift at all, and About says which version this is and
+ * where to read more. */
 type Tab =
   | "changes"
   | "unmanaged"
   | "configs"
   | "sets"
   | "history"
-  | "settings";
+  | "settings"
+  | "about";
 
 /**
  * The menubar window's shell: loads the overview (and the sets adopting
@@ -425,6 +429,19 @@ export default function App() {
               >
                 Settings
               </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={tab === "about"}
+                className={`-mb-px flex items-center border-b-2 pb-2 text-[13px] font-medium ${
+                  tab === "about"
+                    ? "border-ink text-ink"
+                    : "border-transparent text-ink-muted"
+                }`}
+                onClick={() => setTab("about")}
+              >
+                About
+              </button>
             </div>
             <div role="tabpanel" className="flex-1 overflow-y-auto">
               {tab === "changes" ? (
@@ -459,6 +476,8 @@ export default function App() {
                 />
               ) : tab === "history" ? (
                 <History commits={commits} />
+              ) : tab === "about" ? (
+                <About />
               ) : settings ? (
                 <SettingsArea
                   value={settings}

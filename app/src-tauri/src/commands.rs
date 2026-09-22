@@ -298,6 +298,53 @@ fn parse_provider(raw: &str) -> Result<dotfix_core::config::ProviderKind, String
     }
 }
 
+/// What the About area shows: the version, and where to read more.
+#[derive(serde::Serialize)]
+pub struct About {
+    pub version: String,
+    pub links: Vec<Link>,
+}
+
+#[derive(serde::Serialize)]
+pub struct Link {
+    pub label: String,
+    pub url: String,
+}
+
+/// Reads nothing on disk, so About stays answerable on a machine where
+/// everything else fails — which is exactly when someone goes looking for
+/// the documentation.
+#[tauri::command]
+pub fn about() -> About {
+    About {
+        version: dotfix_core::about::VERSION.to_string(),
+        links: dotfix_core::about::LINKS
+            .iter()
+            .map(|(label, url)| Link {
+                label: label.to_string(),
+                url: url.to_string(),
+            })
+            .collect(),
+    }
+}
+
+/// Open one of dotfix's own links in the browser.
+///
+/// Refuses anything else. The argument arrives from a webview, and a command
+/// that opens whatever it is handed is a way to open anything — the same
+/// reason `open_in_repo` below refuses paths outside the repository.
+#[tauri::command]
+pub fn open_link(app: tauri::AppHandle, url: String) -> Result<(), String> {
+    use tauri_plugin_opener::OpenerExt;
+
+    if !dotfix_core::about::is_known(&url) {
+        return Err(format!("`{url}` is not one of dotfix's own links"));
+    }
+    app.opener()
+        .open_url(url, None::<&str>)
+        .map_err(|e| e.to_string())
+}
+
 /// Open a file inside the repository in whatever the user edits it with.
 ///
 /// Takes a repository-relative path and joins it onto the repository root,

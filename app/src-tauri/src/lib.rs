@@ -94,6 +94,8 @@ pub fn run() {
             None,
         ))
         .invoke_handler(tauri::generate_handler![
+            commands::about,
+            commands::open_link,
             commands::overview,
             commands::refresh,
             commands::apply_items,
