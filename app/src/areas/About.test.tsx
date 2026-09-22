@@ -5,11 +5,15 @@ import About from "./About";
 
 const readAbout = vi.fn();
 const openLink = vi.fn();
+const checkUpdate = vi.fn();
 
 vi.mock("../api", () => ({
   readAbout: () => readAbout(),
   openLink: (url: string) => openLink(url),
+  checkUpdate: () => checkUpdate(),
 }));
+
+const current = { state: "current", version: null, url: null, reason: null };
 
 const data = {
   version: "1.2.3",
@@ -27,6 +31,7 @@ describe("About", () => {
   beforeEach(() => {
     readAbout.mockReset().mockResolvedValue(data);
     openLink.mockReset().mockResolvedValue(undefined);
+    checkUpdate.mockReset().mockResolvedValue(current);
   });
 
   it("shows the version and both links", async () => {
@@ -49,5 +54,42 @@ describe("About", () => {
     await waitFor(() =>
       expect(screen.getByRole("alert")).toHaveTextContent(/not one of dotfix's own links/i),
     );
+  });
+
+  it("offers a newer release and opens its page", async () => {
+    checkUpdate.mockResolvedValue({
+      state: "newer",
+      version: "1.0.1",
+      url: "https://github.com/NoiXdev/dotfix/releases/tag/v1.0.1",
+      reason: null,
+    });
+    render(<About />);
+    const offer = await screen.findByRole("button", {
+      name: /1\.0\.1 is available/i,
+    });
+    fireEvent.click(offer);
+    expect(openLink).toHaveBeenCalledWith(
+      "https://github.com/NoiXdev/dotfix/releases/tag/v1.0.1",
+    );
+  });
+
+  it("says nothing alarming when GitHub cannot be reached", async () => {
+    // Being offline is not a problem with the installation, so it must not
+    // produce an error banner — the version stays on screen either way.
+    checkUpdate.mockResolvedValue({
+      state: "unknown",
+      version: null,
+      url: null,
+      reason: "Could not resolve host",
+    });
+    render(<About />);
+    expect(await screen.findByText(/could not check/i)).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByText(/version 1\.2\.3/i)).toBeInTheDocument();
+  });
+
+  it("confirms when there is nothing newer", async () => {
+    render(<About />);
+    expect(await screen.findByText(/newest release/i)).toBeInTheDocument();
   });
 });

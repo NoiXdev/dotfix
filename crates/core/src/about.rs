@@ -27,6 +27,25 @@ pub fn is_known(url: &str) -> bool {
     LINKS.iter().any(|(_, known)| *known == url)
 }
 
+/// Whether this is a release page of dotfix's own repository.
+///
+/// The update check produces a URL that is not known in advance — it names
+/// a tag — so it cannot be in the fixed list above, but it still has to be
+/// openable. Matching a prefix would be wrong here: `RELEASES_PREFIX`
+/// followed by anything includes `.../tag/../../../other`, so the tag is
+/// checked to be a single plain path segment.
+pub fn is_release_page(url: &str) -> bool {
+    let Some(tag) = url.strip_prefix(RELEASES_PREFIX) else {
+        return false;
+    };
+    !tag.is_empty()
+        && tag
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '-' | '_' | '+'))
+}
+
+const RELEASES_PREFIX: &str = "https://github.com/NoiXdev/dotfix/releases/tag/";
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -57,6 +76,27 @@ mod tests {
             "",
         ] {
             assert!(!is_known(url), "{url} should not be openable");
+        }
+    }
+
+    #[test]
+    fn a_release_page_of_ours_is_openable() {
+        assert!(is_release_page(
+            "https://github.com/NoiXdev/dotfix/releases/tag/v1.0.0-beta.1"
+        ));
+    }
+
+    #[test]
+    fn a_release_url_may_not_climb_out_of_the_tag() {
+        // A prefix check alone would accept every one of these.
+        for url in [
+            "https://github.com/NoiXdev/dotfix/releases/tag/",
+            "https://github.com/NoiXdev/dotfix/releases/tag/../../../settings",
+            "https://github.com/NoiXdev/dotfix/releases/tag/v1/extra",
+            "https://github.com/NoiXdev/other/releases/tag/v1",
+            "https://github.com.evil.example/NoiXdev/dotfix/releases/tag/v1",
+        ] {
+            assert!(!is_release_page(url), "{url} should not be openable");
         }
     }
 

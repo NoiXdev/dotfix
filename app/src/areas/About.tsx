@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
-import { openLink, readAbout } from "../api";
-import type { About as AboutData } from "../types";
+import { checkUpdate, openLink, readAbout } from "../api";
+import type { About as AboutData, UpdateCheck } from "../types";
 
 /**
  * Version and where to read more.
@@ -17,10 +17,21 @@ import type { About as AboutData } from "../types";
  */
 export default function About() {
   const [data, setData] = useState<AboutData | null>(null);
+  const [update, setUpdate] = useState<UpdateCheck | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     readAbout().then(setData, (err: Error) => setError(err.message));
+    // Separate from the version: the panel must paint before the network
+    // answers, and a failure here is not an error banner.
+    checkUpdate().then(setUpdate, () =>
+      setUpdate({
+        state: "unknown",
+        version: null,
+        url: null,
+        reason: null,
+      }),
+    );
   }, []);
 
   return (
@@ -33,6 +44,33 @@ export default function About() {
         <p className="mt-1 text-xs text-ink-muted">
           {data ? `Version ${data.version}` : "…"}
         </p>
+        {update === null ? (
+          <p className="mt-1 text-xs text-ink-muted">Checking for updates…</p>
+        ) : update.state === "newer" && update.version ? (
+          <p className="mt-1 text-xs">
+            <button
+              type="button"
+              className="text-decision underline underline-offset-2"
+              onClick={() => {
+                if (update.url) {
+                  openLink(update.url).catch((err: Error) =>
+                    setError(err.message),
+                  );
+                }
+              }}
+            >
+              {`Version ${update.version} is available`}
+            </button>
+          </p>
+        ) : update.state === "current" ? (
+          <p className="mt-1 text-xs text-ink-muted">
+            You are on the newest release.
+          </p>
+        ) : (
+          <p className="mt-1 text-xs text-ink-muted">
+            Could not check for a newer release.
+          </p>
+        )}
       </div>
 
       {error ? (

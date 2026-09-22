@@ -13,6 +13,7 @@ import type {
   Published,
   Settings,
   StepOutcome,
+  UpdateCheck,
   WizardAnswers,
 } from "./types";
 
@@ -33,6 +34,10 @@ export const readAbout = () => call<About>("about");
 /// Refused by the backend unless it is one of dotfix's own links, so this
 /// cannot become a way to open arbitrary URLs from the webview.
 export const openLink = (url: string) => call<void>("open_link", { url });
+
+/// Asks GitHub whether a newer release exists. Runs only when the About area
+/// is opened — dotfix does not poll.
+export const checkUpdate = () => call<UpdateCheck>("check_update");
 
 export const getOverview = () => call<Overview>("overview");
 export const refresh = () => call<Overview>("refresh");

@@ -95,6 +95,7 @@ pub fn run() {
         ))
         .invoke_handler(tauri::generate_handler![
             commands::about,
+            commands::check_update,
             commands::open_link,
             commands::overview,
             commands::refresh,

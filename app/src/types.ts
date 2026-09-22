@@ -225,3 +225,15 @@ export interface About {
   version: string;
   links: { label: string; url: string }[];
 }
+
+/**
+ * Mirrors `commands::UpdateView`. `unknown` is not a failure — being unable
+ * to reach GitHub says nothing about this installation, so the area shows
+ * the version it already knows and mentions the reason quietly.
+ */
+export interface UpdateCheck {
+  state: "current" | "newer" | "unknown";
+  version: string | null;
+  url: string | null;
+  reason: string | null;
+}

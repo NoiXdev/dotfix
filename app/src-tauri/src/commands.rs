@@ -328,6 +328,51 @@ pub fn about() -> About {
     }
 }
 
+/// Whether a newer dotfix has been published.
+///
+/// Its own command rather than part of `about`, so the About area paints
+/// immediately and fills this in when the answer arrives — a panel that
+/// waits on a network request to show a version number it already knows
+/// looks broken on a slow connection.
+///
+/// Never fails: unreachable, rate-limited and malformed all arrive as
+/// `state: "unknown"` carrying a reason, because none of them is a problem
+/// with this installation.
+#[tauri::command]
+pub fn check_update() -> UpdateView {
+    use dotfix_core::update::Check;
+
+    match dotfix_core::update::check(&dotfix_core::ports::RealExec, dotfix_core::about::VERSION) {
+        Check::Current => UpdateView {
+            state: "current",
+            version: None,
+            url: None,
+            reason: None,
+        },
+        Check::Newer { version, url } => UpdateView {
+            state: "newer",
+            version: Some(version),
+            url: Some(url),
+            reason: None,
+        },
+        Check::Unknown(reason) => UpdateView {
+            state: "unknown",
+            version: None,
+            url: None,
+            reason: Some(reason),
+        },
+    }
+}
+
+#[derive(serde::Serialize)]
+pub struct UpdateView {
+    /// `current`, `newer` or `unknown`.
+    pub state: &'static str,
+    pub version: Option<String>,
+    pub url: Option<String>,
+    pub reason: Option<String>,
+}
+
 /// Open one of dotfix's own links in the browser.
 ///
 /// Refuses anything else. The argument arrives from a webview, and a command
@@ -337,7 +382,7 @@ pub fn about() -> About {
 pub fn open_link(app: tauri::AppHandle, url: String) -> Result<(), String> {
     use tauri_plugin_opener::OpenerExt;
 
-    if !dotfix_core::about::is_known(&url) {
+    if !dotfix_core::about::is_known(&url) && !dotfix_core::about::is_release_page(&url) {
         return Err(format!("`{url}` is not one of dotfix's own links"));
     }
     app.opener()

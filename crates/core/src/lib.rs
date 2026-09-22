@@ -20,5 +20,6 @@ pub mod sets;
 pub mod settings;
 pub mod state;
 pub mod status_line;
+pub mod update;
 
 pub use error::{Error, Result};
