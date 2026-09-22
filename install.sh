@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Bootstrap dotfix on a fresh Mac.
 #
-#   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/NoiXdev/dotfix/v1.0.0-beta.1/install.sh)"
+#   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/NoiXdev/dotfix/v1.0.0/install.sh)"
 #
 # Always fetch a release tag, never `main`: an intermediate commit must never
 # be able to break a machine that is being set up.
 #
-# This installs from the Homebrew tap, which carries final releases only.
-# While dotfix is in beta, download the binary from the release page instead.
+# This installs from the Homebrew tap, which carries final releases only. For
+# a pre-release, download the binary from the release page instead.
 set -euo pipefail
 
 if [[ "$(uname -s)" != "Darwin" ]]; then

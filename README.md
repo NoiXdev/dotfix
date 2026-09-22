@@ -32,17 +32,17 @@ It comes as a command-line tool and a menubar app, both driving the same steps.
 
 ## Install
 
-No release is tagged yet. Build it from source — you need a
-[Rust toolchain](https://rustup.rs/):
-
 ```bash
-git clone https://github.com/NoiXdev/dotfix.git
-cd dotfix
-cargo install --path crates/cli
+brew tap NoiXdev/tap
+brew install dotfix
 ```
 
-The menubar app is optional and built separately; see
-[Development](#development).
+The menubar app is optional: open the DMG from the
+[latest release](https://github.com/NoiXdev/dotfix/releases/latest) and drag
+dotfix into Applications. It is signed and notarized.
+
+Building from source needs a [Rust toolchain](https://rustup.rs/) and is
+described under [Development](#development).
 
 Then set this Mac up from whichever side you prefer — both run the same
 steps.
@@ -212,15 +212,15 @@ the tray glyphs are single images embedded with `include_bytes!`, so there
 are no `@2x` tray variants to generate. Commit the result, it is not built by
 CI.
 
-Releases are cut by pushing a `v*` tag: the workflow builds a universal binary,
-attaches it to the release and bumps the Homebrew formula in
-`NoiXdev/homebrew-tap` using the `TAP_TOKEN` secret — a fine-grained PAT scoped
-to that repository only.
+Releases are cut by running the `Release` workflow, which picks a bump and
+optionally a pre-release line (`beta`, `alpha`, `rc`). It sets the version
+across every crate, generates the changelog, tags, builds the signed app and
+the universal command-line binary, and publishes them.
 
-> **Not yet wired up.** `NoiXdev/homebrew-tap` does not exist, so the formula
-> in `packaging/dotfix.rb` has nowhere to be bumped to and the release
-> workflows cannot complete. Creating the tap is what unblocks the first
-> release, and with it the one-line installer.
+The Homebrew formula in `NoiXdev/homebrew-tap` is bumped from there — but only
+for a final release. Homebrew has no notion of a pre-release, so anything that
+reaches the tap is what `brew upgrade` hands every user; betas are installed
+from the release page instead.
 
 ## Documentation
 
