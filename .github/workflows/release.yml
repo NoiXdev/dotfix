@@ -68,6 +68,12 @@ jobs:
           targets: aarch64-apple-darwin,x86_64-apple-darwin
       - uses: Swatinem/rust-cache@v2
 
+      # rust-toolchain.toml pins a version, so cargo does not use the
+      # toolchain the step above configured. `rustup target add` applies to
+      # the active one, which is the one that has to hold both targets.
+      - name: Add both macOS targets to the pinned toolchain
+        run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
+
       - name: Build both architectures
         run: |
           cargo build --release -p dotfix --target aarch64-apple-darwin
