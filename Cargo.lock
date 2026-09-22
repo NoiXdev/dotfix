@@ -987,7 +987,7 @@ dependencies = [
 
 [[package]]
 name = "dotfix"
-version = "1.0.0-beta.1"
+version = "1.0.0-beta.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -1001,7 +1001,7 @@ dependencies = [
 
 [[package]]
 name = "dotfix-app"
-version = "1.0.0-beta.1"
+version = "1.0.0-beta.0"
 dependencies = [
  "anyhow",
  "dotfix-core",
@@ -1016,7 +1016,7 @@ dependencies = [
 
 [[package]]
 name = "dotfix-core"
-version = "1.0.0-beta.1"
+version = "1.0.0-beta.0"
 dependencies = [
  "minijinja",
  "plist",
