@@ -1,0 +1,120 @@
+name: Release
+
+# One button for a whole release. The shared workflow owns the version, the
+# changelog, the tag, the GitHub release and the signed .app; this file adds
+# the two things that are dotfix's own: the universal CLI binary, and the
+# Homebrew formula that points at it.
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump
+        type: choice
+        options: [patch, minor, major]
+        default: patch
+      prerelease_id:
+        description: >
+          Prerelease line. "none" promotes to a final version and is the only
+          value that reaches Homebrew.
+        type: choice
+        options: [none, beta, alpha, rc]
+        default: beta
+      dry_run:
+        description: Build everything, publish nothing
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    uses: NoiXdev/github-workflows/.github/workflows/create_tauri_changelog_version_release.yaml@main
+    secrets: inherit
+    with:
+      bump: ${{ inputs.bump }}
+      # A choice input cannot offer an empty option, so "none" stands in for
+      # it. The test is inverted on purpose: `== 'none' && '' || …` cannot
+      # work, because '' is falsy and the || branch would always win.
+      prerelease_id: ${{ inputs.prerelease_id != 'none' && inputs.prerelease_id || '' }}
+      platforms: macos
+      # This repository is a Cargo workspace with the frontend beside the
+      # crates, so all four paths differ from the single-crate defaults.
+      app_dir: app
+      tauri_dir: app/src-tauri
+      extra_crates: crates/core,crates/cli
+      rust_workspace: "."
+      cargo_lock: Cargo.lock
+      dry_run: ${{ inputs.dry_run }}
+
+  cli:
+    name: Build and attach the CLI
+    needs: release
+    runs-on: macos-latest
+    outputs:
+      sha256: ${{ steps.pack.outputs.sha256 }}
+      asset: ${{ steps.pack.outputs.asset }}
+    steps:
+      # The tag the release job just pushed carries the bumped version, so the
+      # binary reports the version it is released under. A dry run has no tag;
+      # it builds the branch as a compile check and publishes nothing.
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.dry_run && github.ref_name || needs.release.outputs.tag }}
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build both architectures
+        run: |
+          cargo build --release -p dotfix --target aarch64-apple-darwin
+          cargo build --release -p dotfix --target x86_64-apple-darwin
+
+      - name: Pack a universal binary
+        id: pack
+        env:
+          TAG: ${{ needs.release.outputs.tag }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          lipo -create -output dist/dotfix \
+            target/aarch64-apple-darwin/release/dotfix \
+            target/x86_64-apple-darwin/release/dotfix
+          # The formula's url embeds this file name. Changing its shape breaks
+          # every `brew upgrade` until the tap is edited by hand.
+          asset="dotfix-${TAG}-macos-universal.tar.gz"
+          tar -czf "$asset" -C dist dotfix
+          sha="$(shasum -a 256 "$asset" | cut -d' ' -f1)"
+          printf '%s  %s\n' "$sha" "$asset" > checksum.txt
+          echo "asset=$asset" >> "$GITHUB_OUTPUT"
+          echo "sha256=$sha" >> "$GITHUB_OUTPUT"
+
+      - name: Attach to the release
+        if: ${{ inputs.dry_run == false }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ needs.release.outputs.tag }}" \
+            "${{ steps.pack.outputs.asset }}" checksum.txt --clobber
+  tap:
+    name: Bump the Homebrew formula
+    needs: [release, cli]
+    # Homebrew has no concept of a prerelease: anything that lands in the tap
+    # is what `brew upgrade` hands every user. Betas therefore skip this job
+    # and are installed from the release page instead.
+    if: ${{ inputs.dry_run == false && needs.release.outputs.is-prerelease == 'false' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch the bump
+        env:
+          GH_TOKEN: ${{ secrets.TAP_TOKEN }}
+          TAG: ${{ needs.release.outputs.tag }}
+        run: |
+          gh workflow run bump.yml --repo NoiXdev/homebrew-tap \
+            -f kind=formula \
+            -f name=dotfix \
+            -f version="${TAG#v}" \
+            -f sha256="${{ needs.cli.outputs.sha256 }}"
